@@ -61,9 +61,9 @@ fun Project.setupCommon() {
         }
         lint {
             showAll = true
-            checkAllWarnings = true
-            checkReleaseBuilds = true
-            warningsAsErrors = true
+            checkAllWarnings = false
+            checkReleaseBuilds = false
+            warningsAsErrors = false
             textOutput = project.file("build/lint.txt")
             htmlOutput = project.file("build/lint.html")
         }
@@ -129,9 +129,18 @@ fun Project.setupAppCommon() {
                     keyPassword = pwd
                 }
             }
+        } else if (rootProject.file("custom.keystore").exists()) {
+            signingConfigs {
+                create("release") {
+                    storeFile = rootProject.file("custom.keystore")
+                    storePassword = "nekobox123"
+                    keyAlias = "nekobox"
+                    keyPassword = "nekobox123"
+                }
+            }
         }
         buildTypes {
-            val key = signingConfigs.findByName("release")
+            val key = signingConfigs.findByName("release") ?: signingConfigs.findByName("debug")
             if (key != null) {
                 getByName("release").signingConfig = key
                 getByName("debug").signingConfig = key

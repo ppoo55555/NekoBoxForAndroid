@@ -123,6 +123,9 @@ fun buildConfig(
         return list
     }
 
+    if (!forTest) {
+        ProfileManager.ensureDefaultRules()
+    }
     val extraRules = if (forTest) listOf() else SagerDatabase.rulesDao.enabledRules()
     val extraProxies =
         if (forTest) mapOf() else SagerDatabase.proxyDao.getEntities(extraRules.mapNotNull { rule ->

@@ -61,8 +61,12 @@ func (g *geoip) Rules(countryCode string) ([]option.HeadlessRule, error) {
 func init() {
 	nekoutils.GetGeoIPHeadlessRules = func(name string) ([]option.HeadlessRule, error) {
 		g := new(geoip)
-		if err := g.Open(filepath.Join(externalAssetsPath, "geoip.db")); err != nil {
-			return nil, err
+		dbPath := filepath.Join(externalAssetsPath, "geoip.db")
+		if err := g.Open(dbPath); err != nil {
+			extractAssets()
+			if err2 := g.Open(dbPath); err2 != nil {
+				return nil, err2
+			}
 		}
 		defer g.geoipReader.Close()
 		return g.Rules(name)

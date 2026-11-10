@@ -78,10 +78,8 @@ func InitCore(process, cachePath, internalAssets, externalAssets string,
 			updateRootCACerts(pem)
 		}
 
-		// bg
-		if isBgProcess {
-			extractAssets()
-		}
+		// extract bundled geoip/geosite assets immediately
+		extractAssets()
 	}()
 }
 

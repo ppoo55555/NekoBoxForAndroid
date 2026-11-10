@@ -9,17 +9,23 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	"golang.org/x/mobile/asset"
 )
 
+var extractAssetsMutex sync.Mutex
+
 func extractAssets() {
+	extractAssetsMutex.Lock()
+	defer extractAssetsMutex.Unlock()
+
 	useOfficialAssets := intfNB4A.UseOfficialAssets()
 
 	extract := func(name string) {
 		err := extractAssetName(name, useOfficialAssets)
 		if err != nil {
-			log.Println("Extract", geoipDat, "failed:", err)
+			log.Println("Extract", name, "failed:", err)
 		}
 	}
 
@@ -113,10 +119,16 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 
 	extractXz := func(f asset.File) error {
 		tmpXzName := dstName + ".xz"
+		tmpDstName := dstName + ".tmp"
 		err := extractAsset(f, tmpXzName)
 		if err == nil {
-			err = Unxz(tmpXzName, dstName)
+			err = Unxz(tmpXzName, tmpDstName)
 			os.Remove(tmpXzName)
+			if err == nil {
+				err = os.Rename(tmpDstName, dstName)
+			} else {
+				os.Remove(tmpDstName)
+			}
 		}
 		if err != nil {
 			return fmt.Errorf("extract xz: %v", err)

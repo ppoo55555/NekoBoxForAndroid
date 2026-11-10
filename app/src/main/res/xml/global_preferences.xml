@@ -77,6 +77,7 @@
             app:summary="@string/metered_summary"
             app:title="@string/metered" />
         <SwitchPreference
+            app:defaultValue="true"
             app:icon="@drawable/baseline_developer_board_24"
             app:key="acquireWakeLock"
             app:summary="@string/acquire_wake_lock_summary"
@@ -110,7 +111,7 @@
             app:key="bypassLanInCore"
             app:title="@string/bypass_lan_in_core" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
-            app:defaultValue="1"
+            app:defaultValue="2"
             app:entries="@array/traffic_sniffing_values"
             app:entryValues="@array/int_array_3"
             app:icon="@drawable/ic_baseline_manage_search_24"
@@ -123,7 +124,7 @@
             app:summary="@string/resolve_destination_summary"
             app:title="@string/resolve_destination" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
-            app:defaultValue="0"
+            app:defaultValue="2"
             app:entries="@array/ipv6_mode"
             app:entryValues="@array/int_array_4"
             app:icon="@drawable/ic_image_looks_6"
@@ -142,13 +143,13 @@
 
     <PreferenceCategory app:title="@string/cag_dns">
         <EditTextPreference
-            app:defaultValue="https://dns.google/dns-query"
+            app:defaultValue="https://1.1.1.1/dns-query"
             app:icon="@drawable/ic_action_dns"
             app:key="remoteDns"
             app:title="@string/remote_dns"
             app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nb4a.ui.SimpleMenuPreference
-            app:defaultValue="auto"
+            app:defaultValue="prefer_ipv6"
             app:entries="@array/dns_network_select"
             app:entryValues="@array/dns_network_select"
             app:key="domain_strategy_for_remote"
@@ -225,6 +226,7 @@
             app:title="@string/network_change_reset_connections"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
+            app:defaultValue="true"
             app:key="wakeResetConnections"
             app:title="@string/wake_reset_connections"
             app:useSimpleSummaryProvider="true" />

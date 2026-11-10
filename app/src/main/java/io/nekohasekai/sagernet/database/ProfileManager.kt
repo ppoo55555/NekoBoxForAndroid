@@ -9,7 +9,6 @@ import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import java.io.IOException
 import java.sql.SQLException
-import java.util.*
 
 
 object ProfileManager {
@@ -181,59 +180,82 @@ object ProfileManager {
         }
     }
 
-    suspend fun getRules(): List<RuleEntity> {
-        var rules = SagerDatabase.rulesDao.allRules()
+    @Synchronized
+    fun ensureDefaultRules() {
+        val rules = SagerDatabase.rulesDao.allRules()
         if (rules.isEmpty() && !DataStore.rulesFirstCreate) {
             DataStore.rulesFirstCreate = true
-            createRule(
+            val defaultRules = listOf(
                 RuleEntity(
-                    name = app.getString(R.string.route_opt_block_quic),
+                    name = "屏蔽 QUIC (强制TCP+IPv6轮询)",
+                    userOrder = 1L,
+                    enabled = true,
                     port = "443",
                     network = "udp",
-                    outbound = -2
-                )
-            )
-            createRule(
+                    protocol = "quic",
+                    outbound = -2L
+                ),
+                RuleEntity(
+                    name = "屏蔽 UDP 443 (防QUIC复用)",
+                    userOrder = 2L,
+                    enabled = true,
+                    port = "443",
+                    network = "udp",
+                    outbound = -2L
+                ),
+                RuleEntity(
+                    name = "屏蔽 WebRTC STUN (防真实IP泄露)",
+                    userOrder = 3L,
+                    enabled = true,
+                    port = "3478,5349,19302,19305",
+                    network = "udp",
+                    outbound = -2L
+                ),
+                RuleEntity(
+                    name = "Google 全家桶强制代理 (geosite+域名)",
+                    userOrder = 4L,
+                    enabled = true,
+                    domains = "geosite:google\ndomain:google.com\ndomain:googleapis.com\ndomain:googleapis.cn\ndomain:gstatic.com\ndomain:googleusercontent.com\ndomain:accounts.google.com\ndomain:1e100.net\ndomain:ggpht.com\ndomain:gvt1.com\ndomain:gvt2.com\ndomain:youtube.com\ndomain:ytimg.com\ndomain:googlevideo.com\ndomain:gmail.com\ndomain:android.com\ndomain:g.co",
+                    outbound = 0L
+                ),
+                RuleEntity(
+                    name = app.getString(R.string.route_play_store, "中国"),
+                    userOrder = 5L,
+                    enabled = true,
+                    domains = "domain:googleapis.cn\ndomain:xn--ngstr-lra8j.com",
+                    outbound = 0L
+                ),
                 RuleEntity(
                     name = app.getString(R.string.route_opt_block_ads),
+                    userOrder = 6L,
+                    enabled = false,
                     domains = "geosite:category-ads-all",
-                    outbound = -2
+                    outbound = -2L
+                ),
+                RuleEntity(
+                    name = app.getString(R.string.route_bypass_domain, "中国"),
+                    userOrder = 7L,
+                    enabled = false,
+                    domains = "geosite:cn",
+                    outbound = -1L
+                ),
+                RuleEntity(
+                    name = app.getString(R.string.route_bypass_ip, "中国"),
+                    userOrder = 8L,
+                    enabled = false,
+                    ip = "geoip:cn",
+                    outbound = -1L
                 )
             )
-            val fuckedCountry = mutableListOf("cn:中国")
-            if (Locale.getDefault().country != Locale.CHINA.country) {
-                // 非中文用户
-                fuckedCountry += "ir:Iran"
-                fuckedCountry += "ru:Russia"
+            defaultRules.forEach { rule ->
+                rule.id = SagerDatabase.rulesDao.createRule(rule)
             }
-            for (c in fuckedCountry) {
-                val country = c.substringBefore(":")
-                val displayCountry = c.substringAfter(":")
-                //
-                if (country == "cn") createRule(
-                    RuleEntity(
-                        name = app.getString(R.string.route_play_store, displayCountry),
-                        domains = "googleapis.cn",
-                    ), false
-                )
-                createRule(
-                    RuleEntity(
-                        name = app.getString(R.string.route_bypass_domain, displayCountry),
-                        domains = "geosite:$country",
-                        outbound = -1
-                    ), false
-                )
-                createRule(
-                    RuleEntity(
-                        name = app.getString(R.string.route_bypass_ip, displayCountry),
-                        ip = "geoip:$country",
-                        outbound = -1
-                    ), false
-                )
-            }
-            rules = SagerDatabase.rulesDao.allRules()
         }
-        return rules
+    }
+
+    suspend fun getRules(): List<RuleEntity> {
+        ensureDefaultRules()
+        return SagerDatabase.rulesDao.allRules()
     }
 
 }
