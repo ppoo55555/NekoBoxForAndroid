@@ -90,7 +90,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var allowInsecureOnRequest by configurationStore.boolean(Key.ALLOW_INSECURE_ON_REQUEST)
     var networkChangeResetConnections by configurationStore.boolean(Key.NETWORK_CHANGE_RESET_CONNECTIONS) { true }
-    var wakeResetConnections by configurationStore.boolean(Key.WAKE_RESET_CONNECTIONS)
+    var wakeResetConnections by configurationStore.boolean(Key.WAKE_RESET_CONNECTIONS) { true }
 
     //
 
@@ -99,7 +99,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var nightTheme by configurationStore.stringToInt(Key.NIGHT_THEME)
     var serviceMode by configurationStore.string(Key.SERVICE_MODE) { Key.MODE_VPN }
 
-    var trafficSniffing by configurationStore.stringToInt(Key.TRAFFIC_SNIFFING) { 1 }
+    var trafficSniffing by configurationStore.stringToInt(Key.TRAFFIC_SNIFFING) { 2 }
     var resolveDestination by configurationStore.boolean(Key.RESOLVE_DESTINATION)
 
     var mtu by configurationStore.stringToInt(Key.MTU) { 9000 }
@@ -113,7 +113,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var globalCustomConfig by configurationStore.string(Key.GLOBAL_CUSTOM_CONFIG) { "" }
 
-    var remoteDns by configurationStore.string(Key.REMOTE_DNS) { "https://dns.google/dns-query" }
+    var remoteDns by configurationStore.string(Key.REMOTE_DNS) { "https://1.1.1.1/dns-query" }
     var directDns by configurationStore.string(Key.DIRECT_DNS) { "https://223.5.5.5/dns-query" }
     var enableDnsRouting by configurationStore.boolean(Key.ENABLE_DNS_ROUTING) { true }
     var enableFakeDns by configurationStore.boolean(Key.ENABLE_FAKEDNS) { true }
@@ -121,7 +121,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var rulesProvider by configurationStore.stringToInt(Key.RULES_PROVIDER)
     var logLevel by configurationStore.stringToInt(Key.LOG_LEVEL)
     var logBufSize by configurationStore.int(Key.LOG_BUF_SIZE) { 0 }
-    var acquireWakeLock by configurationStore.boolean(Key.ACQUIRE_WAKE_LOCK)
+    var acquireWakeLock by configurationStore.boolean(Key.ACQUIRE_WAKE_LOCK) { true }
 
     // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
     private val userIndex by lazy { Binder.getCallingUserHandle().hashCode() }
@@ -132,6 +132,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     fun initGlobal() {
         if (configurationStore.getString(Key.MIXED_PORT) == null) {
             mixedPort = mixedPort
+        }
+        if (configurationStore.getString("domain_strategy_for_remote") == null) {
+            configurationStore.putString("domain_strategy_for_remote", "prefer_ipv6")
         }
     }
 
@@ -144,7 +147,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         configurationStore.putString(key, "$value")
     }
 
-    var ipv6Mode by configurationStore.stringToInt(Key.IPV6_MODE) { IPv6Mode.DISABLE }
+    var ipv6Mode by configurationStore.stringToInt(Key.IPV6_MODE) { IPv6Mode.PREFER }
 
     var meteredNetwork by configurationStore.boolean(Key.METERED_NETWORK)
     var proxyApps by configurationStore.boolean(Key.PROXY_APPS)
