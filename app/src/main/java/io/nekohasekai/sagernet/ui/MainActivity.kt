@@ -116,14 +116,6 @@ class MainActivity : ThemedActivity(),
                 )
             }
         }
-
-        if (isPreview) {
-            MaterialAlertDialogBuilder(this)
-                .setTitle(BuildConfig.PRE_VERSION_NAME)
-                .setMessage(R.string.preview_version_hint)
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
-        }
     }
 
     fun refreshNavMenu(clashApi: Boolean) {
